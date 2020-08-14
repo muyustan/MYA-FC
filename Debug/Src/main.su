@@ -1,3 +1,4 @@
-mya_stm32f103xx.h:66:6:myafc_clock_config	4	static
+mya_stm32f103xx.h:92:6:myafc_clock_config	4	static
 main.c:22:6:dummy_delay	16	static
-main.c:33:5:main	8	static
+main.c:33:6:TIM2_IRQHandler	4	static
+main.c:41:5:main	8	static

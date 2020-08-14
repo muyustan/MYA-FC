@@ -8,6 +8,24 @@
 #ifndef MYA_STM32F103XX_H_
 #define MYA_STM32F103XX_H_
 
+/* NVIC */
+
+#define NVIC_BASE 0xE000E100U
+
+typedef struct NVIC_Registers {
+
+	volatile uint32_t ISER[3];
+	volatile uint8_t RESERVED0[120];
+	volatile uint32_t ICER[3];
+	// ...
+
+} NVIC_Type;
+
+#define NVIC ((NVIC_Type*) NVIC_BASE)
+
+/* END NVIC */
+
+
 /* RCC */
 
 #define RCC_BASE 0x40021000U
@@ -61,7 +79,14 @@ typedef struct RCC_Registers {
 	#define RCC_CFGR_SWS_PLL ((uint32_t)0x00000008U) // PLL used as system clock
 
 
-#define GPIOC_EN() (RCC->APB2ENR |= 0x10)
+#define GPIOA_EN()	(RCC->APB2ENR |= 0x04)
+#define GPIOB_EN()	(RCC->APB2ENR |= 0x08)
+#define GPIOC_EN()	(RCC->APB2ENR |= 0x10)
+#define AFIO_EN()	(RCC->APB2ENR |= 0x01)
+
+#define TIM2_EN()	(RCC->APB1ENR |= 0x01)
+#define TIM3_EN()	(RCC->APB1ENR |= 0x02)
+#define TIM4_EN()	(RCC->APB1ENR |= 0x04)
 
 /* sets system clock to 8 x PLLMUL */
 void myafc_clock_config(){
@@ -81,9 +106,9 @@ void myafc_clock_config(){
 
 	RCC->CFGR &= ~RCC_CFGR_HPRE; // AHB prescaler = 1
 
-	RCC->CFGR &= ~RCC_CFGR_PPRE1; // APB1 prescaler clear
+	RCC->CFGR &= ~RCC_CFGR_PPRE1; // APB1 prescaler = 1
 
-	RCC->CFGR &= ~RCC_CFGR_PPRE2; // APB2 prescaler clear
+	RCC->CFGR &= ~RCC_CFGR_PPRE2; // APB2 prescaler = 1
 
 	RCC->CR |= RCC_CR_PLLON; // activate PLL
 	while (!(RCC->CR & RCC_CR_PLLRDY)) {} // wait till PLL is locked/ready
@@ -99,12 +124,10 @@ void myafc_clock_config(){
 
 /* END RCC */
 
-
-
-
-
 /* GPIO */
 
+#define GPIOA_BASE 0x40010800U
+#define GPIOB_BASE 0x40010C00U
 #define GPIOC_BASE 0x40011000U
 
 typedef struct GPIO_Registers {
@@ -119,8 +142,69 @@ typedef struct GPIO_Registers {
 
 } GPIO_Type;
 
+#define GPIOA ((GPIO_Type*) GPIOA_BASE)
+#define GPIOB ((GPIO_Type*) GPIOB_BASE)
 #define GPIOC ((GPIO_Type*) GPIOC_BASE)
 
 /* END GPIO */
+
+/* AFIO */
+
+#define AFIO_BASE 0x4001000
+
+typedef struct AFIO_Registers {
+
+	volatile uint32_t EVCR;
+	volatile uint32_t MAPR;
+	volatile uint32_t EXTICR1;
+	volatile uint32_t EXTICR2;
+	volatile uint32_t EXTICR3;
+	volatile uint32_t EXTICR4;
+	volatile uint32_t RESERVED0;
+	volatile uint32_t MAPR2;
+
+} AFIO_Type;
+
+#define AFIO ((AFIO_Type*) AFIO_BASE)
+
+/* END AFIO */
+
+/* TIMx (2, 3, 4) */
+
+#define TIM2_BASE 0x40000000U
+#define TIM3_BASE 0x40000400U
+#define TIM4_BASE 0x40000800U
+
+typedef struct TIMx_Registers_2_3_4 {
+
+	volatile uint32_t CR1;
+	volatile uint32_t CR2;
+	volatile uint32_t SMCR;
+	volatile uint32_t DIER;
+	volatile uint32_t SR;
+	volatile uint32_t EGR;
+	volatile uint32_t CCMR1;
+	volatile uint32_t CCMR2;
+	volatile uint32_t CCER;
+	volatile uint32_t CNT;
+	volatile uint32_t PSC;
+	volatile uint32_t ARR;
+	volatile uint32_t RESERVED0;
+	volatile uint32_t CCR1;
+	volatile uint32_t CCR2;
+	volatile uint32_t CCR3;
+	volatile uint32_t CCR4;
+	volatile uint32_t RESERVED1;
+	volatile uint32_t DCR;
+	volatile uint32_t DMAR;
+
+} TIMx_2_3_4_Type;
+
+#define TIM2 ((TIMx_2_3_4_Type*) TIM2_BASE)
+#define TIM3 ((TIMx_2_3_4_Type*) TIM3_BASE)
+#define TIM4 ((TIMx_2_3_4_Type*) TIM4_BASE)
+
+
+/* END TIMx (2, 3, 4) */
 
 #endif /* MYA_STM32F103XX_H_ */
