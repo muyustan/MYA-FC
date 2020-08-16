@@ -8,6 +8,8 @@
 #ifndef MYA_STM32F103XX_H_
 #define MYA_STM32F103XX_H_
 
+#include <stdint.h>
+
 /* NVIC */
 
 #define NVIC_BASE 0xE000E100U
@@ -88,40 +90,6 @@ typedef struct RCC_Registers {
 #define TIM3_EN()	(RCC->APB1ENR |= 0x02)
 #define TIM4_EN()	(RCC->APB1ENR |= 0x04)
 
-/* sets system clock to 8 x PLLMUL */
-void myafc_clock_config(){
-
-	RCC->CR |= RCC_CR_HSEON; // HSEON -> 1 Enable HSE clock
-	while (!(RCC->CR & RCC_CR_HSERDY)) {;} // w8 for HSERDY flag
-
-	/* disable PLL before changes */
-	RCC->CR &= ~RCC_CR_PLLON;
-	while ((RCC->CR & RCC_CR_PLLRDY)) {} // wait till PLL is unlocked
-
-	RCC->CFGR |= RCC_CFGR_PLLSRC; // HSE selected as PLL source
-
-	/* set PLL multiplier value */
-	RCC->CFGR &= ~(RCC_CFGR_PLLMUL); // reset first
-	RCC->CFGR |= RCC_CFGR_PLLMUL_MUL3; // PLL multiplier = 3
-
-	RCC->CFGR &= ~RCC_CFGR_HPRE; // AHB prescaler = 1
-
-	RCC->CFGR &= ~RCC_CFGR_PPRE1; // APB1 prescaler = 1
-
-	RCC->CFGR &= ~RCC_CFGR_PPRE2; // APB2 prescaler = 1
-
-	RCC->CR |= RCC_CR_PLLON; // activate PLL
-	while (!(RCC->CR & RCC_CR_PLLRDY)) {} // wait till PLL is locked/ready
-
-	RCC->CFGR &= ~RCC_CFGR_SW;
-	RCC->CFGR |= RCC_CFGR_SW_PLL; // choose PLL as system clock
-	/* Wait for SYSCLK to be PPL */
-	while((RCC->CFGR & RCC_CFGR_SWS_PLL) != RCC_CFGR_SWS_PLL);
-
-	return;
-
-}
-
 /* END RCC */
 
 /* GPIO */
@@ -175,7 +143,7 @@ typedef struct AFIO_Registers {
 #define TIM3_BASE 0x40000400U
 #define TIM4_BASE 0x40000800U
 
-typedef struct TIMx_Registers_2_3_4 {
+typedef struct TIM_2_3_4_Registers {
 
 	volatile uint32_t CR1;
 	volatile uint32_t CR2;
@@ -198,13 +166,37 @@ typedef struct TIMx_Registers_2_3_4 {
 	volatile uint32_t DCR;
 	volatile uint32_t DMAR;
 
-} TIMx_2_3_4_Type;
+} TIM_2_3_4_Type;
 
-#define TIM2 ((TIMx_2_3_4_Type*) TIM2_BASE)
-#define TIM3 ((TIMx_2_3_4_Type*) TIM3_BASE)
-#define TIM4 ((TIMx_2_3_4_Type*) TIM4_BASE)
+#define TIM2 ((TIM_2_3_4_Type*) TIM2_BASE)
+#define TIM3 ((TIM_2_3_4_Type*) TIM3_BASE)
+#define TIM4 ((TIM_2_3_4_Type*) TIM4_BASE)
 
 
 /* END TIMx (2, 3, 4) */
+
+/* I2Cx */
+
+#define I2C1_BASE 0x40005400U
+#define I2C2_BASE 0x40005800U
+
+typedef struct I2Cx_Registers {
+
+	volatile uint32_t CR1;
+	volatile uint32_t CR2;
+	volatile uint32_t OAR1;
+	volatile uint32_t OAR2;
+	volatile uint32_t DR;
+	volatile uint32_t SR1;
+	volatile uint32_t SR2;
+	volatile uint32_t CCR;
+	volatile uint32_t TRISE;
+
+} I2Cx_Type;
+
+#define I2C1 ((I2Cx_Type*) I2C1_BASE)
+#define I2C2 ((I2Cx_Type*) I2C2_BASE)
+
+/* END I2Cx */
 
 #endif /* MYA_STM32F103XX_H_ */

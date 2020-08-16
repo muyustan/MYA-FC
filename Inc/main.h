@@ -8,8 +8,10 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-#include <stdint.h>
 #include "mya_stm32f103xx.h"
+#include "mya_f103xx_rcc.h"
+#include "mya_f103xx_gpio.h"
+#include "mya_f103xx_i2c.h"
 
 
 
