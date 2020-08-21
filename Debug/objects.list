@@ -1,6 +1,7 @@
 "Src/main.o"
 "Src/mya_f103xx_gpio.o"
 "Src/mya_f103xx_i2c.o"
+"Src/mya_f103xx_mpu6050.o"
 "Src/mya_f103xx_rcc.o"
 "Src/syscalls.o"
 "Src/sysmem.o"

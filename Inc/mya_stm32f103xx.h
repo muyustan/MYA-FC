@@ -80,16 +80,6 @@ typedef struct RCC_Registers {
 	#define RCC_CFGR_SWS_HSE ((uint32_t)0x00000004U) // HSE used as system clock
 	#define RCC_CFGR_SWS_PLL ((uint32_t)0x00000008U) // PLL used as system clock
 
-
-#define GPIOA_EN()	(RCC->APB2ENR |= 0x04)
-#define GPIOB_EN()	(RCC->APB2ENR |= 0x08)
-#define GPIOC_EN()	(RCC->APB2ENR |= 0x10)
-#define AFIO_EN()	(RCC->APB2ENR |= 0x01)
-
-#define TIM2_EN()	(RCC->APB1ENR |= 0x01)
-#define TIM3_EN()	(RCC->APB1ENR |= 0x02)
-#define TIM4_EN()	(RCC->APB1ENR |= 0x04)
-
 /* END RCC */
 
 /* GPIO */
@@ -194,9 +184,81 @@ typedef struct I2Cx_Registers {
 
 } I2Cx_Type;
 
+/* register bit masks */
+#define I2C_CR1_PE				0x0001U
+#define I2C_CR1_SMBUS			0x0002U
+#define I2C_CR1_SMBTYPE			0x0008U
+#define I2C_CR1_ENARP			0x0010U
+#define I2C_CR1_ENPEC			0x0020U
+#define I2C_CR1_ENGC			0x0040U
+#define I2C_CR1_NOSTRETCH		0x0080U
+#define I2C_CR1_START			0x0100U
+#define I2C_CR1_STOP			0x0200U
+#define I2C_CR1_ACK				0x0400U
+#define I2C_CR1_POS				0x0800U
+#define I2C_CR1_PEC				0x1000U
+#define I2C_CR1_ALERT			0x2000U
+#define I2C_CR1_SWRST			0x8000U
+
+#define I2C_CR2_FREQ			0x001FU
+#define I2C_CR2_ITERREN			0x0100U
+#define I2C_CR2_ITEVTEN			0x0200U
+#define I2C_CR2_ITBUFEN			0x0400U
+#define I2C_CR2_DMAEN			0x0800U
+#define I2C_CR2_LAST			0x1000U
+
+
+#define I2C_CCR_CCR				0x0FFFU
+
 #define I2C1 ((I2Cx_Type*) I2C1_BASE)
 #define I2C2 ((I2Cx_Type*) I2C2_BASE)
 
 /* END I2Cx */
+
+/* DMA */
+
+#define DMA1_BASE 0x40020000U
+
+typedef struct DMA_Channel_Registers {
+
+	volatile uint32_t CCR;
+	volatile uint32_t CNDTR;
+	volatile uint32_t CPAR;
+	volatile uint32_t CMAR;
+	volatile uint32_t RESERVED;
+
+} DMA_Channelx_Type;
+
+typedef struct DMA_Global_Registers {
+
+	volatile uint32_t ISR;
+	volatile uint32_t IFCR;
+	volatile DMA_Channelx_Type Channel1;
+	volatile DMA_Channelx_Type Channel2;
+	volatile DMA_Channelx_Type Channel3;
+	volatile DMA_Channelx_Type Channel4;
+	volatile DMA_Channelx_Type Channel5;
+	volatile DMA_Channelx_Type Channel6;
+	volatile DMA_Channelx_Type Channel7;
+
+} DMAx_Type;
+
+#define DMA1 ((DMAx_Type*) DMA1_BASE)
+
+#define DMA_CCRx_EN			0x0001U
+#define DMA_CCRx_TCIE		0x0002U
+#define DMA_CCRx_HTIE		0x0004U
+#define DMA_CCRx_TEIE		0x0008U
+#define DMA_CCRx_DIR		0x0010U
+#define DMA_CCRx_CIRC		0x0020U
+#define DMA_CCRx_PINC		0x0040U
+#define DMA_CCRx_MINC		0x0080U
+#define DMA_CCRx_PSIZE		0x0300U
+#define DMA_CCRx_MSIZE		0x0C00U
+#define DMA_CCRx_PL			0x3000U
+#define DMA_CCRx_MEM2MEM	0x4000U
+
+
+/* END DMA */
 
 #endif /* MYA_STM32F103XX_H_ */

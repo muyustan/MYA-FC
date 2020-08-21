@@ -1,5 +1,17 @@
 #include "main.h"
 
+#define I2C_ADDR_MPU6050 0x68
+
+/* global variables */
+
+int16_t accX, accY, accZ;
+int8_t gX, gY, gZ;
+
+float temp;
+
+uint8_t a;
+/* end global variables */
+
 void dummy_delay(uint32_t t){
 
 	while(t--);
@@ -13,8 +25,6 @@ void dummy_delay(uint32_t t){
 
 void TIM2_IRQHandler(){
 
-	// GPIOC->ODR ^= (0x1 << 13);
-	TIM2->SR &= ~(0x01); // clear UIF
 	return;
 }
 
@@ -22,12 +32,15 @@ void TIM2_IRQHandler(){
 int main(void)
 {
 
+	accX = accY = accZ = 0;
+
 	clock_config();
 	GPIOA_EN(); // pwm
 	GPIOB_EN(); // i2c
 	GPIOC_EN(); // led
 	AFIO_EN();
 	TIM2_EN(); // pwm
+	DMA1_EN(); // for i2c read
 
 	GPIOC->CRH = 0x300000;
 	GPIOC->BSRR |= 0x2000;
@@ -47,7 +60,7 @@ int main(void)
 
 	TIM2->CCR1 = 1299;
 
-	TIM2->DIER |= 0x01; // update interrupt enable
+	// TIM2->DIER |= 0x01; // update interrupt enable
 
 	TIM2->CCMR1 &= ~(0x03); // set CC1 channel as output channel
 	TIM2->CCMR1 &= ~(0b111 << 4);
@@ -59,7 +72,7 @@ int main(void)
 
 	NVIC->ISER[0] |= 0x01 << 28; // enable TIM2 global interrupt
 
-	/* I2C1 */
+	/* GPIO configurations for I2C1 */
 
 	GPIOB->CRL &= ~(0xF << 6*4);
 	GPIOB->CRL |= (0xE << 6*4); // set PB6(SCL1) as AF output open-drain
@@ -67,6 +80,56 @@ int main(void)
 	GPIOB->CRL &= ~(0xF << 7*4);
 	GPIOB->CRL |= (0xE << 7*4); // set PB7(SDA1) as AF output open-drain
 
+	/* I2C1 initiation */
+
+	I2C1_EN();
+	i2c_init();
+
+	/* MPU6050 initiation */
+
+	mpu_6050_wake_up();
+	dummy_delay(84000); // to stabilize the sensor
+	led_toggle(); // sensor ready
+
+	uint8_t arr[14] = {};
+	mpu6050_read_burst(59, 14, arr);
+
+	accX = (arr[0] << 8) | arr[1];
+	accY = (arr[2] << 8) | arr[3];
+	accZ = (arr[4] << 8) | arr[5];
+	temp = ((int16_t) ((arr[6] << 8) | arr[7]) / 340.0f) + 36.53f;
+
 	for(;;){
+
+
 	}
 }
+
+
+void i2c_clear_bus(){
+
+	I2C1_EN();
+	I2C1->CR1 &= ~0x01; // PE = 0
+	GPIOB->CRL &= ~(0b1111 << 24); // pb6 gp od output scl
+	GPIOB->CRL &= ~(0b1111 << 28); // pb7 gp od output sda
+	GPIOB->CRL |= (0b0110 << 24); // pb6 gp od output scl
+	GPIOB->CRL |= (0b0110 << 28); // pb7 gp od output sda
+	GPIOB->ODR |= GPIO_PIN_6 | GPIO_PIN_7;
+	while(!gpio_read(GPIOB, 6) || !gpio_read(GPIOB, 7));
+	GPIOB->ODR &= ~GPIO_PIN_7;
+	while(gpio_read(GPIOB, 7));
+	GPIOB->ODR  &= ~(GPIO_PIN_6);
+	while(gpio_read(GPIOB, 6));
+	GPIOB->ODR |= GPIO_PIN_6;
+	while(!gpio_read(GPIOB, 6));
+	GPIOB->ODR |= GPIO_PIN_7;
+	while(!gpio_read(GPIOB, 7));
+
+
+	I2C1->CR1 |= 0x8000;	// software reset I2C1
+	I2C1->CR1 &= ~0x8000;   // out of reset
+	I2C1->CR1 |= 0x01; // PE = 1
+
+
+}
+

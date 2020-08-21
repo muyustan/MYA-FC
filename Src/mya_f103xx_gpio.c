@@ -10,7 +10,7 @@
 /* reads the input data of a single pin */
 uint8_t gpio_read(GPIO_Type* GPIOx, uint8_t pin_number){
 
-	return (GPIOx->IDR & (0x01 << pin_number));
+	return (uint8_t)(GPIOx->IDR & (0x01 << pin_number));
 }
 
 void gpio_write(GPIO_Type* GPIOx, uint16_t GPIO_PIN_MASK, GPIO_State state){
