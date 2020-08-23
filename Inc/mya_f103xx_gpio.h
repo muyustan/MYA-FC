@@ -34,8 +34,8 @@ typedef enum {
 
 } GPIO_State;
 
-#define led_on()		gpio_write(GPIOC, GPIO_PIN_13, HIGH)
-#define led_off()		gpio_write(GPIOC, GPIO_PIN_13, LOW)
+#define led_on()		gpio_write(GPIOC, GPIO_PIN_13, LOW)
+#define led_off()		gpio_write(GPIOC, GPIO_PIN_13, HIGH)
 #define led_toggle()	gpio_toggle(GPIOC, GPIO_PIN_13)
 
 /* function prototypes */

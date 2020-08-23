@@ -10,6 +10,11 @@
 /* sets system clock to 8 x PLLMUL */
 void clock_config(){
 
+	// FLASH->ACR |= 0x00; // for 0<SYSCLK<24 (MHz)
+	// FLASH->ACR |= 0x01; // for 24<SYSCLK<48 (MHz)
+	FLASH->ACR |= 0x02; // for 48<SYSCLK<72 (MHz)
+
+
 	RCC->CR |= RCC_CR_HSEON; // HSEON -> 1 Enable HSE clock
 	while (!(RCC->CR & RCC_CR_HSERDY)) {;} // w8 for HSERDY flag
 
@@ -21,13 +26,15 @@ void clock_config(){
 
 	/* set PLL multiplier value */
 	RCC->CFGR &= ~(RCC_CFGR_PLLMUL); // reset first
-	RCC->CFGR |= RCC_CFGR_PLLMUL_MUL3; // PLL multiplier = 3
+	RCC->CFGR |= RCC_CFGR_PLLMUL_MUL9; // PLL multiplier = 3
 
-	RCC->CFGR &= ~RCC_CFGR_HPRE; // AHB prescaler = 1
+	RCC->CFGR &= ~RCC_CFGR_HPRE; // AHB prescaler clear
+	RCC->CFGR |= RCC_CFGR_HPRE_DIV1; // AHB @ 72 MHz
 
-	RCC->CFGR &= ~RCC_CFGR_PPRE1; // APB1 prescaler = 1
+	RCC->CFGR &= ~RCC_CFGR_PPRE1;
+	RCC->CFGR |= RCC_CFGR_PPRE1_DIV2; // APB1 @ 36 MHz
 
-	RCC->CFGR &= ~RCC_CFGR_PPRE2; // APB2 prescaler = 1
+	RCC->CFGR &= ~RCC_CFGR_PPRE2; // APB2 prescaler = 1, APB2 @ 72 MHz
 
 	RCC->CR |= RCC_CR_PLLON; // activate PLL
 	while (!(RCC->CR & RCC_CR_PLLRDY)) {} // wait till PLL is locked/ready

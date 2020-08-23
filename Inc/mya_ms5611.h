@@ -41,5 +41,7 @@
 
 void ms5611_reset();
 
+void ms5611_get_coefficients(uint16_t *arr);
+
 
 #endif /* MYA_MS5611_H_ */

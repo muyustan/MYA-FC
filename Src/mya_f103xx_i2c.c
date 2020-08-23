@@ -16,15 +16,17 @@ void i2c_init(){
 	I2C1->CR1 &= ~0x01; // PE = 0
 
 	I2C1->CR2 &= ~0x1F;
-	I2C1->CR2 |= 0x18; // APB1 CLK freq = 24 MHz
+	I2C1->CR2 |= 36; // APB1 CLK freq = 36 MHz
 
 	/* timing */
 	I2C1->CCR &= ~0xFFF;
-	I2C1->CCR |= 120; // for PCLK1 = 24 MHz and I2C SCL at 100 kHz
+	I2C1->CCR |= 180; // for PCLK1 = 36 MHz and I2C SCL at 100 kHz
 
-	I2C1->TRISE = 25; // maximum rise time
+	I2C1->TRISE = 37; // maximum rise time (I2C clock source freq. + 1)
 
 	I2C1->CR1 |= 0x01; // PE(peripheral enable)
+
+	dummy_delay(168000); // wait some to stabilize
 
 	/* ********** */
 

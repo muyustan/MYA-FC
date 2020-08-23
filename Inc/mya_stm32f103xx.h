@@ -27,6 +27,52 @@ typedef struct NVIC_Registers {
 
 /* END NVIC */
 
+/* SysTick Timer */
+
+#define SysTick_BASE	0xE000E010
+
+typedef struct SysTick_Registers {
+
+	volatile uint32_t CTRL;
+	volatile uint32_t LOAD;
+	volatile uint32_t VAL;
+	volatile uint32_t CALIB;
+
+} SysTick_Type;
+
+#define SysTick ((SysTick_Type*) SysTick_BASE)
+
+/* END SysTick Timer */
+
+/********** FLASH ***************/
+
+#define FLASH_BASE 0x40022000U
+
+#define FLASH_ACR_LATENCY 		0x00000007U
+#define FLASH_ACR_HLFCYA		0x00000008U
+#define FLASH_ACR_PRFTBE		0x00000010U
+#define FLASH_ACR_PRFTBS		0x00000020U
+
+
+typedef struct FLASH {
+
+	volatile uint32_t ACR;
+	volatile uint32_t KEYR;
+	volatile uint32_t OPTKEYR;
+	volatile uint32_t SR;
+	volatile uint32_t CR;
+	volatile uint32_t AR;
+	volatile uint32_t RESERVED;
+	volatile uint32_t OBR;
+	volatile uint32_t WRPR;
+
+} FLASH_Type;
+
+#define FLASH ((FLASH_Type*) FLASH_BASE)
+
+
+/********* END FLASH **************/
+
 
 /* RCC */
 
@@ -66,9 +112,27 @@ typedef struct RCC_Registers {
 	#define RCC_CFGR_PLLMUL_MUL7 	((uint32_t)0x00140000U)
 	#define RCC_CFGR_PLLMUL_MUL8 	((uint32_t)0x00180000U)
 	#define RCC_CFGR_PLLMUL_MUL9 	((uint32_t)0x001C0000U)
-	#define RCC_CFGR_PPRE2			((uint32_t)0x00003800U)
-	#define RCC_CFGR_PPRE1			((uint32_t)0x00000700U)
-	#define RCC_CFGR_HPRE			((uint32_t)0x000000F0U)
+
+#define RCC_CFGR_PPRE2			((uint32_t)0x00003800U)
+
+#define RCC_CFGR_PPRE1			((uint32_t)0x00000700U)
+	#define RCC_CFGR_PPRE1_DIV1		((uint32_t)0x00000000U)
+	#define RCC_CFGR_PPRE1_DIV2		((uint32_t)0x00000400U)
+	#define RCC_CFGR_PPRE1_DIV4		((uint32_t)0x00000500U)
+	#define RCC_CFGR_PPRE1_DIV8		((uint32_t)0x00000600U)
+	#define RCC_CFGR_PPRE1_DIV16	((uint32_t)0x00000700U)
+
+
+#define RCC_CFGR_HPRE			((uint32_t)0x000000F0U)
+	#define RCC_CFGR_HPRE_DIV1		((uint32_t)0x00000000U)
+	#define RCC_CFGR_HPRE_DIV2		((uint32_t)0x00000080U)
+	#define RCC_CFGR_HPRE_DIV4		((uint32_t)0x00000090U)
+	#define RCC_CFGR_HPRE_DIV8		((uint32_t)0x000000A0U)
+	#define RCC_CFGR_HPRE_DIV16		((uint32_t)0x000000B0U)
+	#define RCC_CFGR_HPRE_DIV64		((uint32_t)0x000000C0U)
+	#define RCC_CFGR_HPRE_DIV128	((uint32_t)0x000000D0U)
+	#define RCC_CFGR_HPRE_DIV256	((uint32_t)0x000000E0U)
+	#define RCC_CFGR_HPRE_DIV512	((uint32_t)0x000000F0U)
 
 #define RCC_CFGR_SW		((uint32_t)0x00000003U) // system clock switch
 	#define RCC_CFGR_SW_HSI ((uint32_t)0x00000000U) // choose HSI as system clock

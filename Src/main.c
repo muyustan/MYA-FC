@@ -24,6 +24,7 @@ float temperature;
 
 uint8_t a;
 uint8_t bmpID;
+uint16_t coeffs[6];
 /* end global variables */
 
 void dummy_delay(uint32_t t){
@@ -42,9 +43,16 @@ void TIM2_IRQHandler(){
 	return;
 }
 
+float mya_absf(float x){
+
+	return x > 0.f ? x : -x;
+
+}
 
 int main(void)
 {
+
+	clock_config();
 
 	accX_raw = accY_raw = accZ_raw = 0;
 	accX = accY = accZ = 0.0f;
@@ -53,7 +61,7 @@ int main(void)
 	temperature = 0;
 
 
-	clock_config();
+
 	GPIOA_EN(); // pwm
 	GPIOB_EN(); // i2c
 	GPIOC_EN(); // led
@@ -105,8 +113,8 @@ int main(void)
 	i2c_init();
 	bmpID = 99;
 
+
 	//i2c_write_single_byte(0x77, 0xf4, 0x22);
-	led_toggle(); // sensor ready
 
 	//i2c_read_dma(0x77, 0xD0, 1, &bmpID);
 	//bmpID = i2c_read_single_byte(0x77, 0xD0);
@@ -115,6 +123,7 @@ int main(void)
 	/* MPU6050 initiation */
 
 	mpu6050_wake_up();
+	led_toggle();
 	dummy_delay(84000); // to stabilize the sensor
 
 
@@ -124,6 +133,13 @@ int main(void)
 	bmpID = i2c_read_single_byte(HMC5883L_I2C_ADDR, 12);
 
 	ms5611_reset();
+
+	dummy_delay(16800);
+
+	ms5611_get_coefficients(coeffs);
+
+	 led_toggle(); // sensor ready
+
 
 	for(;;){
 
@@ -147,6 +163,12 @@ int main(void)
 		gyroX = (float)gyroX_raw / GYROSCOPE_SENSITIVITY;
 		gyroY = (float)gyroY_raw / GYROSCOPE_SENSITIVITY;
 		gyroZ = (float)gyroZ_raw / GYROSCOPE_SENSITIVITY;
+
+		if(mya_absf(accX) > 0.5){
+			led_on();
+		}
+		else
+			led_off();
 
 	}
 }

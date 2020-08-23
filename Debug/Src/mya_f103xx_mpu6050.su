@@ -1,4 +1,0 @@
-mya_f103xx_mpu6050.c:11:6:mpu6050_write	16	static
-mya_f103xx_mpu6050.c:17:6:mpu6050_read_burst	16	static
-mya_f103xx_mpu6050.c:23:6:mpu6050_wake_up	8	static
-mya_f103xx_mpu6050.c:29:6:mpu6050_i2c_bypass_en	8	static
