@@ -1,15 +1,29 @@
 #include "main.h"
 
-#define I2C_ADDR_MPU6050 0x68
+/* private definitions */
+
+#define ACCELEROMETER_SENSITIVITY 16384 // per g
+#define GYROSCOPE_SENSITIVITY 131 // per degrees/seconds
+
+#define MS5611_I2C_ADDR		0x77 // barometer
+#define HMC5883L_I2C_ADDR	0x1E // magnetometer
+
+/* end private definitions */
 
 /* global variables */
 
-int16_t accX, accY, accZ;
-int8_t gX, gY, gZ;
+int16_t accX_raw, accY_raw, accZ_raw;
+int16_t gyroX_raw, gyroY_raw, gyroZ_raw;
 
-float temp;
+float accX, accY, accZ;
+float gyroX, gyroY, gyroZ;
+
+uint8_t mpu6050_data_buffer[14] = {0};
+
+float temperature;
 
 uint8_t a;
+uint8_t bmpID;
 /* end global variables */
 
 void dummy_delay(uint32_t t){
@@ -32,7 +46,12 @@ void TIM2_IRQHandler(){
 int main(void)
 {
 
-	accX = accY = accZ = 0;
+	accX_raw = accY_raw = accZ_raw = 0;
+	accX = accY = accZ = 0.0f;
+	gyroX_raw = gyroY_raw = gyroZ_raw = 0;
+	gyroX = gyroY = gyroZ = 0.0f;
+	temperature = 0;
+
 
 	clock_config();
 	GPIOA_EN(); // pwm
@@ -84,23 +103,50 @@ int main(void)
 
 	I2C1_EN();
 	i2c_init();
+	bmpID = 99;
+
+	//i2c_write_single_byte(0x77, 0xf4, 0x22);
+	led_toggle(); // sensor ready
+
+	//i2c_read_dma(0x77, 0xD0, 1, &bmpID);
+	//bmpID = i2c_read_single_byte(0x77, 0xD0);
+
 
 	/* MPU6050 initiation */
 
-	mpu_6050_wake_up();
+	mpu6050_wake_up();
 	dummy_delay(84000); // to stabilize the sensor
-	led_toggle(); // sensor ready
 
-	uint8_t arr[14] = {};
-	mpu6050_read_burst(59, 14, arr);
 
-	accX = (arr[0] << 8) | arr[1];
-	accY = (arr[2] << 8) | arr[3];
-	accZ = (arr[4] << 8) | arr[5];
-	temp = ((int16_t) ((arr[6] << 8) | arr[7]) / 340.0f) + 36.53f;
+	mpu6050_i2c_bypass_en();
+
+	//i2c_write_single_byte(HMC5883L_I2C_ADDR, 0x01, 0x00);
+	bmpID = i2c_read_single_byte(HMC5883L_I2C_ADDR, 12);
+
+	ms5611_reset();
 
 	for(;;){
 
+
+		mpu6050_read_burst(59, 14, mpu6050_data_buffer);
+
+		accX_raw = (mpu6050_data_buffer[0] << 8) | mpu6050_data_buffer[1];
+		accY_raw = (mpu6050_data_buffer[2] << 8) | mpu6050_data_buffer[3];
+		accZ_raw = (mpu6050_data_buffer[4] << 8) | mpu6050_data_buffer[5];
+
+		accX = (float)accX_raw / ACCELEROMETER_SENSITIVITY;
+		accY = (float)accY_raw / ACCELEROMETER_SENSITIVITY;
+		accZ = (float)accZ_raw / ACCELEROMETER_SENSITIVITY;
+
+		temperature = ((int16_t) ((mpu6050_data_buffer[6] << 8) | mpu6050_data_buffer[7]) / 340.0f) + 36.53f;
+
+		gyroX_raw = (mpu6050_data_buffer[8] << 8) | mpu6050_data_buffer[9];
+		gyroY_raw = (mpu6050_data_buffer[10] << 8) | mpu6050_data_buffer[11];
+		gyroZ_raw = (mpu6050_data_buffer[12] << 8) | mpu6050_data_buffer[13];
+
+		gyroX = (float)gyroX_raw / GYROSCOPE_SENSITIVITY;
+		gyroY = (float)gyroY_raw / GYROSCOPE_SENSITIVITY;
+		gyroZ = (float)gyroZ_raw / GYROSCOPE_SENSITIVITY;
 
 	}
 }

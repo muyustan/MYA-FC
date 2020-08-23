@@ -5,4 +5,6 @@ mya_f103xx_i2c.c:51:6:i2c_send_slave_addr_to_write	24	static
 mya_f103xx_i2c.c:59:9:i2c_read_single_byte	16	static
 mya_f103xx_i2c.c:73:6:i2c_write_single_byte	24	static
 mya_f103xx_i2c.c:96:6:i2c_read_dma	24	static
-mya_f103xx_i2c.c:143:6:i2c_stop	4	static
+mya_f103xx_i2c.c:145:6:i2c_logical_or	24	static
+mya_f103xx_i2c.c:154:6:i2c_send_byte_to_bus	16	static
+mya_f103xx_i2c.c:162:6:i2c_stop	4	static

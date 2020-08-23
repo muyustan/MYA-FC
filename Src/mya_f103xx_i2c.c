@@ -139,6 +139,25 @@ void i2c_read_dma(uint8_t slave_addr, uint8_t mem_addr, uint8_t len, uint8_t *rx
 
 }
 
+/* reads a byte from the slave memory and applies logical or with @operand, then
+ * writes it back.
+ */
+void i2c_logical_or(uint8_t slave_addr, uint8_t register_addr, uint8_t operand){
+
+	uint8_t temp;
+	temp = i2c_read_single_byte(slave_addr, register_addr);
+	temp = temp | operand;
+	i2c_write_single_byte(slave_addr, register_addr, temp);
+	return;
+}
+
+void i2c_send_byte_to_bus(uint8_t byte){
+
+	I2C1->DR = byte;
+	while(!I2C1_FLAG_TxE); // wait for Tx buffer to be empty
+
+	return;
+}
 
 void i2c_stop(){
 

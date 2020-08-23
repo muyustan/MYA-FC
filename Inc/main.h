@@ -13,6 +13,7 @@
 #include "mya_f103xx_gpio.h"
 #include "mya_f103xx_i2c.h"
 #include "mya_f103xx_mpu6050.h"
+#include "mya_ms5611.h"
 
 
 

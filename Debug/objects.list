@@ -3,6 +3,7 @@
 "Src/mya_f103xx_i2c.o"
 "Src/mya_f103xx_mpu6050.o"
 "Src/mya_f103xx_rcc.o"
+"Src/mya_ms5611.o"
 "Src/syscalls.o"
 "Src/sysmem.o"
 "Startup/startup_stm32f103c8tx.o"

@@ -47,6 +47,7 @@
 #define MPU6050_I2C_SLV4_DI        0x35   // R
 #define MPU6050_I2C_MST_STATUS     0x36   // R
 #define MPU6050_INT_PIN_CFG        0x37   // R/W
+	#define MPU6050_INT_PIN_CFG_I2C_BYPASS_EN	0x02
 #define MPU6050_INT_ENABLE         0x38   // R/W
 #define MPU6050_INT_STATUS         0x3A   // R
 #define MPU6050_ACCEL_XOUT_H       0x3B   // R
@@ -109,6 +110,8 @@ void mpu6050_write(uint8_t reg_addr, uint8_t data);
 
 void mpu6050_read_burst(uint8_t start_reg_addr, uint8_t num_bytes, uint8_t *data_container);
 
-void mpu_6050_wake_up();
+void mpu6050_wake_up();
+
+void mpu6050_i2c_bypass_en();
 
 #endif /* MYA_F103XX_MPU6050_H_ */

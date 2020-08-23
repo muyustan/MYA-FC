@@ -20,8 +20,15 @@ void mpu6050_read_burst(uint8_t start_reg_addr, uint8_t num_bytes, uint8_t *data
 
 }
 
-void mpu_6050_wake_up(){
+void mpu6050_wake_up(){
 
 	mpu6050_write(MPU6050_PWR_MGMT_1, 0x00);
 
+}
+
+void mpu6050_i2c_bypass_en(){
+
+	i2c_logical_or(MPU6050_I2C_ADDR, MPU6050_INT_PIN_CFG, MPU6050_INT_PIN_CFG_I2C_BYPASS_EN);
+
+	return;
 }
