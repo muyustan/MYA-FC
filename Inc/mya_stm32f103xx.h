@@ -31,6 +31,13 @@ typedef struct NVIC_Registers {
 
 #define SysTick_BASE	0xE000E010
 
+/* define bit masks */
+
+#define SysTick_CTRL_ENABLE		((uint32_t)0x00000001U)
+#define SysTick_CTRL_TICKINT	((uint32_t)0x00000002U)
+#define SysTick_CTRL_CLKSOURCE	((uint32_t)0x00000004U)
+#define SysTick_CTRL_COUNTFLAG	((uint32_t)0x00010000U)
+
 typedef struct SysTick_Registers {
 
 	volatile uint32_t CTRL;

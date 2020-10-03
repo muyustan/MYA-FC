@@ -12,6 +12,8 @@
 
 /* global variables */
 
+volatile uint32_t ms_since_startup;
+
 int16_t accX_raw, accY_raw, accZ_raw;
 int16_t gyroX_raw, gyroY_raw, gyroZ_raw;
 
@@ -34,6 +36,49 @@ void dummy_delay(uint32_t t){
 
 }
 
+/* ticks cannot exceed 24 bits unsigned value */
+#define SysTick_LOAD(ticks) (SysTick->LOAD = (ticks - 1))
+    /* the time duration between two consecutive
+    SysTick interrupt is (RE)LOAD + 1 */
+
+void SysTick_Initialize(){
+
+	ms_since_startup = 0;
+
+    SysTick->CTRL = 0x00; // disable the SysTick
+    // also sets clock for SysTick to AHB/8
+
+    /* for now, the system clock AHB freq. is taken as
+    constant and 72 MHz */
+    /* So, clock for SysTick is at 72/8 = 9 MHz */
+
+    SysTick_LOAD(9000);
+
+    SysTick->VAL = 0x00; // clear the counter current value
+
+    SysTick->CTRL |= (SysTick_CTRL_ENABLE | SysTick_CTRL_TICKINT);
+    // enable both the counter and interrupt
+
+	return;
+}
+
+void SysTick_Handler(){
+
+	ms_since_startup++;
+
+	return;
+}
+
+void delay_ms(uint16_t t){
+
+	uint32_t start_ms = ms_since_startup;
+
+	while((ms_since_startup - start_ms) <= t){;}
+
+	return;
+}
+
+
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
@@ -53,6 +98,7 @@ int main(void)
 {
 
 	clock_config();
+	SysTick_Initialize();
 
 	accX_raw = accY_raw = accZ_raw = 0;
 	accX = accY = accZ = 0.0f;
@@ -71,6 +117,10 @@ int main(void)
 
 	GPIOC->CRH = 0x300000;
 	GPIOC->BSRR |= 0x2000;
+
+	led_on();
+	delay_ms(3000);
+	led_off();
 
 	/* TIM2 PWM */
 	GPIOA->CRL |= 0x01; // output mode for PA0(T2C1)
@@ -138,7 +188,7 @@ int main(void)
 
 	ms5611_get_coefficients(coeffs);
 
-	 led_toggle(); // sensor ready
+	// led_toggle(); // sensor ready
 
 
 	for(;;){

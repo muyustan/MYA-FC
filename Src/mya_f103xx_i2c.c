@@ -26,7 +26,7 @@ void i2c_init(){
 
 	I2C1->CR1 |= 0x01; // PE(peripheral enable)
 
-	dummy_delay(168000); // wait some to stabilize
+	// dummy_delay(168000); // wait some to stabilize
 
 	/* ********** */
 
