@@ -64,7 +64,7 @@ uint8_t i2c_read_single_byte(uint8_t slave_addr, uint8_t register_addr){
 	i2c_send_slave_addr_to_write(slave_addr);
 	I2C1->DR = register_addr;
 	while (!I2C1_FLAG_TxE); // Wait until Tx Data Register is empty
-	i2c_start(); // restart
+	i2c_start(); // issue a restart
 	i2c_send_slave_addr_to_read(slave_addr);
 	i2c_stop(); // issue a stop before reading DR
 	while(!I2C1_FLAG_RxNE); // wait till RxNE is set

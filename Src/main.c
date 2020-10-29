@@ -29,12 +29,6 @@ uint8_t bmpID;
 uint16_t coeffs[6];
 /* end global variables */
 
-void dummy_delay(uint32_t t){
-
-	while(t--);
-	return;
-
-}
 
 /* ticks cannot exceed 24 bits unsigned value */
 #define SysTick_LOAD(ticks) (SysTick->LOAD = (ticks - 1))
@@ -88,7 +82,7 @@ void TIM2_IRQHandler(){
 	return;
 }
 
-float mya_absf(float x){
+float mya_absf(float x){ // abs() for floats
 
 	return x > 0.f ? x : -x;
 
@@ -174,7 +168,7 @@ int main(void)
 
 	mpu6050_wake_up();
 	led_toggle();
-	dummy_delay(84000); // to stabilize the sensor
+	delay_ms(500); // for MPU6050 stabilization
 
 
 	mpu6050_i2c_bypass_en();
@@ -183,8 +177,6 @@ int main(void)
 	bmpID = i2c_read_single_byte(HMC5883L_I2C_ADDR, 12);
 
 	ms5611_reset();
-
-	dummy_delay(16800);
 
 	ms5611_get_coefficients(coeffs);
 
@@ -222,32 +214,3 @@ int main(void)
 
 	}
 }
-
-
-void i2c_clear_bus(){
-
-	I2C1_EN();
-	I2C1->CR1 &= ~0x01; // PE = 0
-	GPIOB->CRL &= ~(0b1111 << 24); // pb6 gp od output scl
-	GPIOB->CRL &= ~(0b1111 << 28); // pb7 gp od output sda
-	GPIOB->CRL |= (0b0110 << 24); // pb6 gp od output scl
-	GPIOB->CRL |= (0b0110 << 28); // pb7 gp od output sda
-	GPIOB->ODR |= GPIO_PIN_6 | GPIO_PIN_7;
-	while(!gpio_read(GPIOB, 6) || !gpio_read(GPIOB, 7));
-	GPIOB->ODR &= ~GPIO_PIN_7;
-	while(gpio_read(GPIOB, 7));
-	GPIOB->ODR  &= ~(GPIO_PIN_6);
-	while(gpio_read(GPIOB, 6));
-	GPIOB->ODR |= GPIO_PIN_6;
-	while(!gpio_read(GPIOB, 6));
-	GPIOB->ODR |= GPIO_PIN_7;
-	while(!gpio_read(GPIOB, 7));
-
-
-	I2C1->CR1 |= 0x8000;	// software reset I2C1
-	I2C1->CR1 &= ~0x8000;   // out of reset
-	I2C1->CR1 |= 0x01; // PE = 1
-
-
-}
-

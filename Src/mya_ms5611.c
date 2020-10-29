@@ -8,6 +8,8 @@
 
 #include "mya_ms5611.h"
 
+void delay_ms(); // let the compiler know that there is a definition for this function somewhere else
+
 static void ms5611_send_command(uint8_t command){
 
 	i2c_start();
@@ -50,7 +52,7 @@ static void ms5611_get_answer(uint8_t *buff, uint8_t len){
 void ms5611_reset(){
 
 	ms5611_send_command(MS5611_COMMAND_RESET);
-	dummy_delay(168000); // THIS DELAY IS MANDATORY FOR PROPER OPERATION!!
+	delay_ms(5); // THIS DELAY IS MANDATORY FOR PROPER OPERATION!!
 	return;
 }
 
