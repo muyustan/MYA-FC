@@ -1,4 +1,5 @@
 #include "main.h"
+#include <math.h>
 
 /* private definitions */
 
@@ -20,13 +21,18 @@ int16_t gyroX_raw, gyroY_raw, gyroZ_raw;
 float accX, accY, accZ;
 float gyroX, gyroY, gyroZ;
 
-uint8_t mpu6050_data_buffer[14] = {0};
+float temperature_mpu6050;
 
-float temperature;
+extern float temperature;
+extern float pressure;
+
+float altitude;
+
+uint8_t mpu6050_data_buffer[14] = {0};
 
 uint8_t a;
 uint8_t bmpID;
-uint16_t coeffs[6];
+
 /* end global variables */
 
 
@@ -91,6 +97,7 @@ float mya_absf(float x){ // abs() for floats
 int main(void)
 {
 
+
 	clock_config();
 	SysTick_Initialize();
 
@@ -98,7 +105,6 @@ int main(void)
 	accX = accY = accZ = 0.0f;
 	gyroX_raw = gyroY_raw = gyroZ_raw = 0;
 	gyroX = gyroY = gyroZ = 0.0f;
-	temperature = 0;
 
 
 
@@ -113,7 +119,7 @@ int main(void)
 	GPIOC->BSRR |= 0x2000;
 
 	led_on();
-	delay_ms(3000);
+	delay_ms(1000);
 	led_off();
 
 	/* TIM2 PWM */
@@ -176,9 +182,9 @@ int main(void)
 	//i2c_write_single_byte(HMC5883L_I2C_ADDR, 0x01, 0x00);
 	bmpID = i2c_read_single_byte(HMC5883L_I2C_ADDR, 12);
 
-	ms5611_reset();
+	ms5611_init();
 
-	ms5611_get_coefficients(coeffs);
+	led_off();
 
 	// led_toggle(); // sensor ready
 
@@ -196,7 +202,7 @@ int main(void)
 		accY = (float)accY_raw / ACCELEROMETER_SENSITIVITY;
 		accZ = (float)accZ_raw / ACCELEROMETER_SENSITIVITY;
 
-		temperature = ((int16_t) ((mpu6050_data_buffer[6] << 8) | mpu6050_data_buffer[7]) / 340.0f) + 36.53f;
+		temperature_mpu6050 = ((int16_t) ((mpu6050_data_buffer[6] << 8) | mpu6050_data_buffer[7]) / 340.0f) + 36.53f;
 
 		gyroX_raw = (mpu6050_data_buffer[8] << 8) | mpu6050_data_buffer[9];
 		gyroY_raw = (mpu6050_data_buffer[10] << 8) | mpu6050_data_buffer[11];
@@ -212,5 +218,12 @@ int main(void)
 		else
 			led_off();
 
+		ms5611_update();
+
+		altitude = (1 - pow((pressure/1013.25), 0.190284)) * 145366.45;
+		altitude *= 0.3048; // feet to meters
+
 	}
+
+	return 0;
 }
